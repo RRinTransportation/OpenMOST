@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+message: "If you use this software or its outputs, please cite the accompanying paper."
+title: "MOST-feature-extraction"
+abstract: "Metadata and reproducibility-feature extraction for transportation research publications, supporting Measuring the State of Open Science in Transportation Using Large Language Models."
+type: software
+authors:
+  - family-names: Ji
+    given-names: Junyi
+    email: junyi.ji@vanderbilt.edu
+    affiliation: Vanderbilt University
+  - family-names: Lu
+    given-names: Ruth
+  - family-names: Belkessa
+    given-names: Linda
+  - family-names: Wang
+    given-names: Liming
+repository-code: "https://github.com/RRinTransportation/MOST-feature-extraction"
+license: Apache-2.0
+version: "0.1.0"
+date-released: "2026-09-19"
+keywords:
+  - open science
+  - reproducible research
+  - transportation engineering
+  - large language models
+  - bibliometrics
+preferred-citation:
+  type: article
+  title: "Measuring the State of Open Science in Transportation Using Large Language Models"
+  authors:
+    - family-names: Ji
+      given-names: Junyi
+    - family-names: Lu
+      given-names: Ruth
+    - family-names: Belkessa
+      given-names: Linda
+    - family-names: Wang
+      given-names: Liming
+    - family-names: Varotto
+      given-names: Silvia
+    - family-names: Dong
+      given-names: Yongqi
+    - family-names: Saunier
+      given-names: Nicolas
+    - family-names: Ameli
+      given-names: Mostafa
+    - family-names: Macfarlane
+      given-names: Gregory S.
+    - family-names: Madadi
+      given-names: Bahman
+    - family-names: Wu
+      given-names: Cathy
+  journal: "Transportation Research Part C: Emerging Technologies"
+  year: 2026
+  doi: "10.1016/j.trc.2026.106024"
+  identifiers:
+    - type: other
+      value: "arXiv:2601.14429"
+      description: "arXiv preprint"
+  url: "https://doi.org/10.1016/j.trc.2026.106024"
