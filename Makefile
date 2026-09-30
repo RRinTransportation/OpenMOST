@@ -16,12 +16,13 @@ help:
 	@echo "make validate     re-run the analyses and compare with the committed/published results"
 	@echo "  make validate-choice-models | validate-descriptive | validate-feature-extraction"
 
-ZENODO_URL := https://zenodo.org/records/23045964/files
+# Current version of the Zenodo record (all versions: doi:10.5281/zenodo.23045963)
+ZENODO_URL := https://zenodo.org/records/23059196/files
 
 data:
 	@cd zenodo && for f in analysis_dataset:1b1bfbc6e2d127cada44b349b1a2bdcc \
 	    sample_xml_data:67244bc81d500261ffa5a44cb501c57d \
-	    manual-validation-dataset:c512928e681854b1cbf2a8578f7592ec; do \
+	    manual_validation_dataset:68fb6ca78b460f9bceb237752e747e07; do \
 	  name=$${f%%:*}; md5=$${f##*:}; \
 	  [ -f $$name.zip ] || curl -fsSL -o $$name.zip "$(ZENODO_URL)/$$name.zip?download=1" || exit 1; \
 	  got=$$(python3 -c "import hashlib,sys;print(hashlib.md5(open(sys.argv[1],'rb').read()).hexdigest())" $$name.zip); \
@@ -29,7 +30,7 @@ data:
 	  echo "$$name.zip: OK"; \
 	done
 	cd zenodo && unzip -oq analysis_dataset.zip && unzip -oq sample_xml_data.zip \
-	  && unzip -oq manual-validation-dataset.zip -d manual-validation-dataset
+	  && unzip -oq manual_validation_dataset.zip
 
 setup: setup-python setup-r
 

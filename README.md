@@ -23,7 +23,7 @@ published separately on Zenodo and are placed in [`zenodo/`](zenodo).
    cd OpenMOST
    ```
 2. Download the data from Zenodo
-   ([10.5281/zenodo.23045964](https://doi.org/10.5281/zenodo.23045964)) into
+   ([10.5281/zenodo.23045963](https://doi.org/10.5281/zenodo.23045963)) into
    `zenodo/` and unzip it: `make data` downloads, checksums and unzips all three
    files. See [`zenodo/README.md`](zenodo/README.md) for the exact commands
    and expected layout.
@@ -76,7 +76,7 @@ Exceptions, pending the authors' agreement to relicense under Apache-2.0:
 update analysis/choice-models/CITATION.cff (license: Apache-2.0), and drop this exception list. -->
 
 **Data:** not distributed in this repository. The data are published on
-Zenodo ([10.5281/zenodo.23045964](https://doi.org/10.5281/zenodo.23045964)) under
+Zenodo ([10.5281/zenodo.23045963](https://doi.org/10.5281/zenodo.23045963)) under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); see
 [`zenodo/README.md`](zenodo/README.md). The underlying
 papers remain under Elsevier's copyright and are not redistributed.

@@ -9,7 +9,7 @@ Quarto 1.8, TeX Live 2025.
 ## How to validate
 
 ```bash
-make data         # download + checksum + unzip the Zenodo data (10.5281/zenodo.23045964)
+make data         # download + checksum + unzip the Zenodo data (10.5281/zenodo.23045963)
 make setup        # install every locked environment
 make validate     # lock checks + the three checks below
 ```
@@ -96,7 +96,7 @@ be served. In that case the LLM features cannot be regenerated exactly.
    Both analyses read the published CSV directly, so the analyses reproduce,
    but the dataset itself cannot be rebuilt from the pipeline.
 2. **The manual validation has no code.** Nothing reads
-   `manual-validation-dataset/h1_96.csv` or `h2_96.csv`, and the manuscript
+   `manual_validation_dataset/h1_96.csv` or `h2_96.csv`, and the manuscript
    sources report no validation metrics to compare against. Recomputed for
    reference, on the 96 papers labelled by both annotators:
 
