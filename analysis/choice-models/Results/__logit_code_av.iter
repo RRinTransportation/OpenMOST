@@ -1,0 +1,9 @@
+asc_ca = -3.892484353397147
+beta_AutoDriving_Covid19_SocPoli_TrafficFlow_TransEmiss_TravMode = -0.6126438755469601
+beta_DataDriven = 0.7382908736796593
+beta_Europe_SouthAmerica_Africa = 1.3722565794525536
+beta_NorthAmerica_Oceania = 1.1117520867326391
+beta_TRB_TRC = 0.7849530877273927
+beta_figure_number = 0.01940982450068536
+beta_other_topics_DrivBeh = -1.32242169272382
+beta_paper_age_years = -0.17783419960777974

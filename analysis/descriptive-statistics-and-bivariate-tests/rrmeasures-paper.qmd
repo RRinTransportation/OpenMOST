@@ -1,0 +1,350 @@
+---
+title: |
+  Towards Accelerating Transportation Research:  Measuring the Practice of Open Science 
+#subtitle: 
+author:
+  - name: Junyi Ji
+  - name: Ruth Lu
+  - name: Yongqin Dong
+  - name: Liming Wang
+  - name: Bahman Madadi
+  - name: Silvia Varotto
+  - name: Nicolas Saunier
+  - name: Gregory S. Macfarlane
+    affiliations: 
+        - id: byuce
+          name: Brigham Young University
+          department: Civil and Construction Engineering
+  - name: Mostafa Ameli
+  - name: Cathy Wu
+    email: cathywu@mit.edu
+    affiliations:
+        - id: mit 
+          name: Massachusetts Institute of Technology
+          department: Civil and Environmental Engineering
+    attributes:
+        corresponding: true
+abstract: |
+  This is the abstract. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum augue turpis, dictum non malesuada a, volutpat eget velit. Nam placerat turpis purus, eu tristique ex tincidunt et. Mauris sed augue eget turpis ultrices tincidunt. Sed et mi in leo porta egestas. Aliquam non laoreet velit. Nunc quis ex vitae eros aliquet auctor nec ac libero. Duis laoreet sapien eu mi luctus, in bibendum leo molestie. Sed hendrerit diam diam, ac dapibus nisl volutpat vitae. Aliquam bibendum varius libero, eu efficitur justo rutrum at. Sed at tempus elit.
+keywords: 
+  - Open Science
+  - Large Language Models
+date: last-modified
+bibliography: main.bib
+format:
+  elsevier-pdf:
+    keep-tex: true
+    journal:
+      name: |
+        Transportation Research Part C: Emerging Technologies
+      formatting: review
+      model: 3p # Don't set a model with preprint
+      cite-style: authoryear
+    # commands to render comments from authors
+    include-in-header: 
+      text: |
+        \usepackage{xcolor}
+        \newcommand{\cw}[1]{\textcolor{orange}{#1}}
+        \newcommand{\Junyi}[1]{\textcolor{purple}{#1}}
+        \newcommand{\Ruth}[1]{\textcolor{teal}{#1}}
+        \newcommand{\Greg}[1]{\textcolor{blue}{#1}}
+        \newcommand{\Yongqi}[1]{\textcolor{violet}{#1}}
+        \newcommand{\Linda}[1]{\textcolor{pink}{#1}}
+        \renewcommand\thefootnote{\textcolor{orange}{\arabic{footnote}}}
+        \newcommand{\cwfn}[1]{\footnote{\textcolor{orange}{CW: #1}}}
+        \newcommand{\Junyifn}[1]{\footnote{\textcolor{purple}{Junyi: #1}}}
+        \usepackage{setspace}
+        \AtBeginEnvironment{tblr}{\begin{singlespacing}}
+        \AtEndEnvironment{tblr}{\end{singlespacing}}
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+library(tidyverse) # various data manipulation tools
+library(rstatix) # tidy statistical tests
+library(modelsummary) # summary tables
+library(tinytable)
+library(kableExtra)
+
+knitr::knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=" ")
+})
+
+
+```
+
+# Introduction {#intro}
+I need a citation to keep from getting a latex error, so @nosek2015promoting is a good one.
+
+# Analysis
+
+## Descriptive statistics and bivariate tests
+
+```{r papers, echo=FALSE, message=FALSE, warning=FALSE}
+papers <- read_csv("../../zenodo/analysis_dataset/papers_cleaned_with_new_columns.csv") |>
+    # Filter out papers that don't need to be included because they are not quantitative studies
+    filter(is_quantitative_study) |>
+    filter(!is.na(is_data_repository_available)) |> # remove papers that have a missing data repository information
+    mutate(
+      # Make some labels that will look better in tables
+      # also, combine some of the variables into a multi-variable
+      is_open_access = ifelse(open_access == TRUE, 'Open access', 'Not open access'),
+      citations_per_year = citation_count/paper_age_years,
+      acceptance_date_ld = lubridate::as_date(acceptance_date),
+      date = ifelse(
+        is.na(acceptance_date_ld), 
+        lubridate::as_date(str_c(year, "-06-01", sep = "")),
+        acceptance_date_ld),
+      data_multi = case_when(
+        is_data_repository_available == TRUE & is_data_cited_or_linked == TRUE ~ 'Data repository and citation',
+        is_data_repository_available == TRUE ~ 'Data repository is available',
+        is_data_cited_or_linked == TRUE ~ 'Data is cited or linked',
+        TRUE ~ 'No repository or citation'
+      ),
+      data_multi = factor(data_multi, levels = c(
+        "No repository or citation", "Data repository is available", "Data is cited or linked", "Data repository and citation")),
+      data_multi3 = case_when(
+        is_data_repository_available == TRUE ~ 'Data repository',
+        is_data_cited_or_linked == TRUE ~ 'Data cited only',
+        TRUE ~ 'No repository or citation'
+      ),
+      is_data_repository_available = ifelse(is_data_repository_available == TRUE, 
+        'Data repository is available', 'Data repository is not available'),
+      is_code_available = ifelse(is_code_publicly_available == TRUE, 
+        'Code is available', 'Code is not available'),
+      is_code_available = factor(is_code_available, levels = c("Code is not available", "Code is available")),
+      # bitbucket and gitlab combine for just a handful of repos, so we'll do github, other, and none
+      code_links = case_when(
+        has_code_link_github ~ 'Link to GitHub',
+        n_code_links > 0 ~ 'Link to other service',
+        TRUE ~ 'No links'
+      ),
+      is_simulation_study = ifelse(is_simulation_study == TRUE, 'Simulation study', 'Not a simulation study'),
+      is_data_cited_or_linked = ifelse(is_data_cited_or_linked == TRUE, 
+        'Data is cited or linked', 'Data is not cited or linked'),
+      availability_statement_present = ifelse(availability_statement_present == TRUE, 
+        'Availability statement is present', 'Availability statement is not present'),
+    ) 
+
+# write_rds(papers, "data_explorer/paper_data.rds")
+
+n_open <- papers |>
+  filter(is_open_access == 'Open access') |>
+  nrow()
+
+n_code <- papers |>
+  filter(is_code_available == 'Code is available') |>
+  nrow()
+n_data <- papers |> group_by(data_multi) |> tally() |> mutate(pct = round(n/sum(n)*100, 1)) 
+```
+
+The analysis dataset contains `r nrow(papers)` papers that report quantitative
+studies (`is_quantitative_study`) among the full-length articles.
+@tbl-descriptives provides descriptive statistics for the dataset, organized by code availability.
+provides descriptive statistics for these papers, organized by code availability. The dataset contains 
+`r n_code` papers with code available, a little more than `r round(n_code / nrow(papers), 0)` \% of the dataset. 
+x
+In total, about `r n_data$pct[1]`% of the papers cite available data, but only
+`r n_data$pct[2] + n_data$pct[3]`% of the papers include a data repository; the remaining `r n_data$pct[4]`% 
+neither cite data nor include a repository.
+
+
+```{r echo=FALSE}
+#| label: tbl-descriptives
+#| tbl-cap: Descriptive Statistics of Data Set
+ds <- papers |>
+  mutate(journal = str_remove(journal, "Transportation Research ")) |>
+  select(
+    `Open Access` = is_open_access,  
+    `Open science score` = open_science_score_0_5, 
+    `Age of paper [years]` = paper_age_years, 
+    `N. tables in paper` = table_number, 
+    `N. figures in paper` = figure_number, 
+    `N. references` = reference_count, 
+    `N. authors` = num_authors,
+    `Times cited` = citation_count, 
+    `Review time [days]` = review_time_days,
+    `Page count` = page_count,
+    `Data availability` = data_multi, 
+    is_code_available, 
+    `Journal` = journal, 
+    `Region of corr. author` = region_normalized, 
+    `Availability statement` = availability_statement_present, 
+    `Paper topic` = lda_topic, 
+    `Links to code repositories` = code_links, 
+  )
+
+    
+datasummary_balance(~ is_code_available,
+  data = ds, dinm = FALSE, 
+  width = c(2, 3.5, 1, 1, 1, 1), output = "kableExtra") |>
+  row_spec(c(10, 12, 16, 23, 29, 31, 46), extra_latex_after = "\\midrule") |>
+  kable_styling(latex_options="scale_down")
+```
+
+
+
+```{r bivariates, include=FALSE}
+chi2_data_code <- chisq.test(papers$is_code_publicly_available, papers$data_multi)
+t_code_years <- papers |> t_test(paper_age_years ~ is_code_publicly_available, detailed = TRUE) |> arrange(group2)
+t_data_years <- papers |> t_test(paper_age_years ~ data_multi, detailed = TRUE) |> arrange(group2)
+```
+
+We conducted a series of bivariate statistical tests on the dependent variables --- specifically, whether the papers provide code or data --- using $t$-tests on differences of means when the independent variable is numeric, and Pearson $\chi^2$ tests of independence when the independent variable is categorical. The results of these tests revealed several statistically significant relationships that guided the analysis that follows in this section. To begin, papers that make code available are also more likely to share data. Newer papers make code available more frequently, and newer papers also tend to share data directly rather than simply cite existing
+data. Papers with corresponding authors in Europe and North America are more likely to make data available than papers with authors in Asia; the same trend holds for sharing code, with South American authors joining the group more likely to share than Asian authors. In absolute terms, authors based in Asia still contribute a substantial number ($N=118$) of code repositories, but their share appears lower when expressed as a percentage of the total number of publications from the region ($N=4516$). 
+The usage of data varies widely by topic, with the topics "Urban Environment \& Active Transport" and "COVID-19 Impact on Travel \& Activities" 
+having higher than expected rates of citing data from others (about 45\% of papers cited or linked to external datasets in these topic categories). Papers in the topic "Data-driven modeling and prediction" share code at a much higher rate than other topics (about 15\% of papers have code available). Other comparisons did not result in bivariate test statistics sufficient to reject a null hypothesis of no relationship or no difference in means. Note that the numbers reported in the analysis section are subject to estimation error arising from the methodology.
+
+These findings are informative, but they may be the result of correlated omitted variables. A complete list of statistics of all variables can be viewed \href{https://019b33f2-34f4-9d17-cc65-86ffbaaa9028.share.connect.posit.cloud/}{here}.
+In the next section we provide a choice model of data and code availability that
+can accommodate the simultaneous influence of multiple variables.
+
+## Incentives for availability
+
+```{r include=FALSE}
+top_data_repository_citations <- papers |> 
+  filter(data_multi == "Data repository and citation") |>
+  group_by(year) |>
+  arrange(desc(citations_per_year)) |>
+  select(year, journal, lda_topic, citations_per_year) |>
+  slice(1:5)
+
+citation_summary_by_year_data <- papers |>
+  group_by(year, data_multi) |>
+  summarise(
+    mean_citations = mean(citations_per_year),
+    n = n(),
+    max_citations = max(citations_per_year),
+    .groups = "drop"
+  ) |>
+  arrange(data_multi)
+```
+
+Open science techniques often require additional investment and effort by researchers. If the discipline does not require these efforts, researchers may respond to various incentives. In our data, two incentives that we capture may include a higher rate of citations on the resulting publication or a reduced review time prior to publication. Unfortunately, neither incentive is observable
+in the papers we studied.
+
+
+In terms of the number of citations, Figures \ref{fig:citations} and shows the citations per year --- calculated as the number of citations in SCOPUS divided by the whole number of years since publication --- for each paper
+ordered by paper acceptance date in SCOPUS.  Figure \ref{fig:citations-data} groups the papers by their data availability in the categories described above, and Figure
+\ref{fig:citations-code} groups the papers by code availability. 
+Both figures show a LOESS moving average rate of the mean citation rate per year, along with a 95\% confidence interval of the mean. In
+neither case are the average citation rates different based on the availability of data or code. 
+Figure \ref{fig:citations-data} shows a temporary increase in the citation rate for papers with a data repository and citation in 2020 and 2021, to the point where the uncertainty band does not overlap the uncertainty band of the other papers with different data sharing practices. Further examination of this effect showed that two papers with unusually high citations drive this effect.
+
+
+```{r echo=FALSE}
+review_time_data <- papers |> t_test(review_time_days ~ data_multi, detailed = TRUE) |> arrange(group2)
+review_time_code <- papers |> t_test(review_time_days ~ is_code_available, detailed = TRUE) |> arrange(group2)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#| label: fig-citations
+#| dev: tikz
+#| sanitize: TRUE
+#| standAlone: FALSE
+#| fig-cap: Citations per year of each paper over time by code and data-sharing practice, with a LOESS moving average line applied for mean comparison.
+#| fig-subcap: 
+#|   - Citations per year by data sharing practice.
+#|   - Citations per year by code sharing practice.
+# wesanderson::wes_palette("Asteroid1") 
+pal <- c("#0A9F9D", "#E54E21", "#6C8645", "#CEB175")
+ggplot(papers, aes(x = acceptance_date_ld, y = citations_per_year + 1, color = data_multi, fill = data_multi)) +
+  geom_bin2d(bins = 100, alpha = 0.2) +
+  #geom_point(alpha = 0.2, raster = TRUE)+ 
+  geom_smooth(method = "loess") + 
+  # facet_wrap(~ data_multi) +
+  scale_y_log10() + theme_bw() + ylab("Citations per Year") + xlab("Acceptance Date") + 
+  scale_x_date() + 
+  scale_color_discrete(name = "Data sharing practice", palette = pal) + 
+  scale_fill_discrete(name = "Data sharing practice", palette = pal)  
+
+pal <- c("#0A9F9D",  "#CEB175")
+ggplot(papers, aes(x = acceptance_date_ld, y = citations_per_year + 1, color = is_code_available, fill = is_code_available)) +
+  geom_bin2d(bins = 100, alpha = 0.2) +
+  geom_smooth(method = "loess") + 
+  # facet_wrap(~ data_multi) +
+  scale_y_log10() + theme_bw() + ylab("Citations per Year") + xlab("Acceptance Date") + 
+  scale_x_date() + 
+  scale_color_discrete(name = "Code sharing practice", palette = pal) + 
+  scale_fill_discrete(name = "Code sharing practice", palette = pal) 
+```
+
+
+
+
+```{r}
+#| label: tbl-incentives
+#| tbl-cap: Incentives for Open Science 
+
+lm_citations_ctl <- lm(log(citations_per_year + 1) ~ journal + lda_topic + region_normalized, data = papers)
+lm_citations <- update(lm_citations_ctl, . ~ . + is_code_available + data_multi)
+
+lm_reviewtime_ctl <- update(lm_citations_ctl, log(review_time_days + 1) ~ .)
+lm_reviewtime <- update(lm_citations, log(review_time_days + 1) ~ .)
+
+acitations <- anova(lm_citations_ctl, lm_citations)
+areviewtime <- anova(lm_reviewtime_ctl, lm_reviewtime)
+
+car::vif(lm_citations)
+
+cm <- c(
+  "(Intercept)" = "Intercept",
+  "is_code_availableCode is available" = "Code is available",
+  "data_multiData repository is available" = "Data repository is available (NC, R)",
+  "data_multiData is cited or linked" = "Data is cited or linked (C, NR)",
+  "data_multiData repository and citation" = "Data repository and citation (C, R)",
+  "journalTransportation Research Part A: Policy and Practice" = "Journal: TR - A",
+  "journalTransportation Research Part B: Methodological" = "Journal: TR - B",
+  "journalTransportation Research Part C: Emerging Technologies" = "Journal: TR - C",
+  "journalTransportation Research Part D: Transport and Environment" = "Journal: TR - D",
+  "journalTransportation Research Part E: Logistics and Transportation Review" = "Journal: TR - E",
+  "journalTransportation Research Part F: Traffic Psychology and Behaviour" = "Journal: TR - F",
+
+  "lda_topicCOVID-19 Impact on Travel & Activities" = "Topic: COVID-19 Impact on Travel & Activities",
+  "lda_topicSocial & Policy Aspects of Mobility" = "Topic: Social & Policy Aspects of Mobility",
+  "lda_topicElectric Vehicles & Ride-Sharing" = "Topic: Electric Vehicles & Ride-Sharing",
+  "lda_topicRoad Infrastructure & Emergency Management" = "Topic: Road Infrastructure & Emergency Management",
+  "region_normalizedSouth America" = "Region: South America"
+)
+
+modelsummary(
+  list(
+    "Controls" = lm_reviewtime_ctl, 
+    "Open Science" = lm_reviewtime, 
+    "Controls" = lm_citations_ctl,
+    "Open Science" = lm_citations),
+  estimate ="{estimate}{stars} ",
+  statistic = "[{conf.low}, {conf.high}]",
+  coef_map = cm,
+  gof_omit = "AIC|BIC|F",
+  notes = c("95% confidence interval in parentheses", 
+  "Full controls: Journal, paper topic, and region of corresponding author.", 
+  "Only significant controls displayed."),
+  format = "tinytable"
+)  |>
+  tinytable::group_tt( j = list( "Review time [days]" = 2:3, "Citations per year" = 4:5))
+```
+
+@tbl-incentives presents estimates of log-linear regression models of the review
+time in days and citations per year for the papers in the dataset. These models include the
+journal, paper topic, and region of corresponding author as dummy controls to account for differing practices between journals and reviewers in topics. Insignificant parameter estimates on these controls are
+suppressed in @tbl-incentives for clarity but the controls by themselves explain virtually all of the 
+reduction in variance in the models, with insignificant reductions in the model $F$-statistic when
+markers for data sharing and code availability are included ($p$-value of `r round(areviewtime[["Pr(>F)"]][2], 2)` for review 
+time and `r round(acitations[["Pr(>F)"]][2], 2)` for citations per year).
+
+There are many considerations in this analysis, and in contemplating the role of
+open science practices vis a vis researcher incentives.  First, researchers
+might not necessarily expect to see reduced review times with open science
+practices. If a reviewer can follow and reproduce the analysis in the paper
+during the review, this may result in more thorough reviews and more extended
+resubmission processes. Improved and more comprehensive reviews would benefit
+science,  but would not strengthen researcher incentives. Similarly, sharing data
+and code may lead to more citations from others who pursue subsequent research,
+but this effect is only likely if the original research question lends itself to
+continued study, and if the code and data are packaged in such a way that
+continued study is feasible. Further, the models presented in @tbl-incentives only
+explain one-tenth to one-fifth of the variance in the data: important variables such 
+as individual reviewer availability, the complexity of the specific research question and methods,
+and other sources of variance are not available to this analysis but likely play a 
+large role.

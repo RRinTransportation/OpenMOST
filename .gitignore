@@ -1,0 +1,48 @@
+# Data: download from Zenodo (see zenodo/README.md)
+zenodo/*
+!zenodo/README.md
+!zenodo/.gitkeep
+*.zip
+temp/
+
+# Secrets / API keys
+.env
+config.json
+full-text-extraction/config.yaml
+
+# Pipeline outputs
+full-text-extraction/journal-meta/
+full-text-extraction/journal-full-text/
+feature-extraction/meta/
+feature-extraction/markdowns/
+feature-extraction/*-gemini/
+feature-extraction/fla_csvs/
+feature-extraction/my_new_lda_model*
+executed/
+# Biogeme writes its outputs next to the notebook (committed copies live in Results/)
+analysis/choice-models/Notebook/*.html
+analysis/choice-models/Notebook/*.pickle
+analysis/choice-models/Notebook/__*.iter
+analysis/choice-models/Notebook/biogeme.toml
+
+# Python / Jupyter
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# R / Quarto / LaTeX build artifacts
+.Rhistory
+.RData
+.Rproj.user/
+.quarto/
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.spl
+*.synctex.gz
+*-tikzDictionary
+
+# OS
+.DS_Store

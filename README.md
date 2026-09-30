@@ -1,72 +1,82 @@
-# rr-meta-data
-Meta data extraction for the publications
+# OpenMOST: Measuring the State of Open Science in Transportation
 
-Assuming original xml files are stored in a folder called `data`.
+Code accompanying *Measuring the State of Open Science in Transportation Using
+Large Language Models* (Transportation Research Part C, 2026;
+[doi:10.1016/j.trc.2026.106024](https://doi.org/10.1016/j.trc.2026.106024);
+preprint [arXiv:2601.14429](https://arxiv.org/abs/2601.14429)).
 
-For the sake of demonstration, 5 open-access xml files are put into an example data folder.
+The repository is organized as a pipeline of three components. The data are
+published separately on Zenodo and are placed in [`zenodo/`](zenodo).
 
-To get your Gemini API key, go to https://ai.google.dev/gemini-api/docs/api-key and follow the instructions.
+| Folder | What it does | Input | Output |
+|---|---|---|---|
+| [`full-text-extraction/`](full-text-extraction) | Retrieve article DOIs and full-text XML from the Elsevier API | Journal ISSNs, Elsevier API key | Full-text XML |
+| [`feature-extraction/`](feature-extraction) | Extract metadata and LLM-based open-science features (code/data availability, etc.), citations, regions, LDA topics | Full-text XML (demo: `zenodo/sample_xml_data/`) | Paper-level feature CSVs |
+| [`analysis/`](analysis) | [Choice models](analysis/choice-models) and [descriptive statistics and bivariate tests](analysis/descriptive-statistics-and-bivariate-tests) | `zenodo/analysis_dataset/` | Tables, figures, model estimates |
+| [`zenodo/`](zenodo) | Location for the downloaded Zenodo data (gitignored) | | |
 
-Create config.json and add your gemini API key, create .env and add Elsevier API key.
+## Quickstart
 
-## Create environment
-Use requirements.txt
-```bash
-conda create --name RR-measure --file requirements.txt
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/RRinTransportation/OpenMOST.git
+   cd OpenMOST
+   ```
+2. Download `analysis_dataset.zip`, `sample_xml_data.zip`, and
+   `manual-validation-dataset.zip` from the Zenodo record into `zenodo/` and
+   unzip them. See [`zenodo/README.md`](zenodo/README.md) for the exact commands
+   and expected layout.
+3. Install the locked environments. Each component has its own:
+   [uv](https://docs.astral.sh/uv/) (`pyproject.toml` + `uv.lock` + `.python-version`)
+   for the Python folders and [renv](https://rstudio.github.io/renv/) (`renv.lock`)
+   for the R analysis. The R analysis also needs R, Quarto and a LuaLaTeX distribution.
+   ```bash
+   make setup        # uv sync --frozen in each Python folder + renv::restore()
+   make validate     # re-run the analyses and compare with the published results
+   ```
+   See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for what is validated and the results.
+4. Follow the README in the folder you want to run. Each folder is
+   self-contained and is run from inside that folder:
+   - To reproduce the paper's analyses, you only need `analysis_dataset`:
+     see [`analysis/`](analysis).
+   - To try the feature-extraction pipeline on the sample papers, see
+     [`feature-extraction/`](feature-extraction) (requires Gemini and Elsevier API keys).
+   - To build a new corpus from scratch, start with
+     [`full-text-extraction/`](full-text-extraction) (requires an Elsevier API key).
+
 ```
-
-## Usage of the metadata extraction script
-```bash
-python 1_meta.py --input_dir 'data' --output_dir 'meta'
+OpenMOST/
+├── full-text-extraction/
+├── feature-extraction/
+├── analysis/
+│   ├── choice-models/
+│   └── descriptive-statistics-and-bivariate-tests/
+├── validation/      # reproducibility checks run by `make validate`
+├── zenodo/          # downloaded data goes here
+├── Makefile
+└── REPRODUCIBILITY.md
 ```
-
-## Usage of the XML to Markdown script
-```bash
-python 2_xml2md.py 'data' -o 'markdowns'
-```
-
-## Usage of the p1 feature on the code with gemini
-```bash
-python 3_code-p1-gemini.py 'markdowns' 'code-p1-gemini'
-```
-
-## Usage of the p1 feature on the data with gemini
-```bash
-python 4_a_data-p1-gemini.py 'markdowns' 'data-p1-gemini'
-```
-
-## Extract is_quantitative (this was added later as a feature):
-```bash
-python 4_a_data-p1-gemini.py 'markdowns' 'is-quantitative-p1-gemini' --prompt-file '4_c_is-quantitative-paper.md'
-```
-
-## Create the CSV file for LLM features
-
-Run in this order:
-Use notebook `5_a_meta_csv.ipynb` to create csv of just metadata.
-Use notebook `5_b_create_new_fla.ipynb` to add code and data features, and `5_c_10k_quant.ipynb` to add is_quantitative.
-
-
-
-## Clean regions into continents
-Use notebook `6_clean_regoins.ipynb`.
-
-## Add citations
-Use notebook `7_get_citations.ipynb`.
-
-## Add LDA topics
-Run `python -m spacy download en_core_web_sm` to download necessary files.
-Use notebook `8_create_lda.ipynb`.
 
 ## License
 
-**Code:** [Apache License 2.0](LICENSE). Free to use, modify, and redistribute,
-including commercially. If you redistribute this code or a derivative, you must
-retain the copyright notice, include a copy of the license, carry forward the
-[NOTICE](NOTICE) file, and state any significant changes you made.
+**Code:** licensed under the [Apache License 2.0](LICENSE). If you
+redistribute this code or a derivative, you must retain the copyright notice,
+include a copy of the license, carry forward the [NOTICE](NOTICE) file, and
+state any significant changes you made.
 
-**Data:** licensed separately -- see [DATA-LICENSE.md](DATA-LICENSE.md). The
-license on this code does not extend to third-party data redistributed here.
+Exceptions, pending the authors' agreement to relicense under Apache-2.0:
+
+- [`analysis/choice-models/`](analysis/choice-models) is © Silvia F. Varotto and
+  currently licensed under the [MIT License](analysis/choice-models/LICENSE).
+- [`analysis/descriptive-statistics-and-bivariate-tests/`](analysis/descriptive-statistics-and-bivariate-tests)
+  is © Gregory S. Macfarlane and does not yet carry a license.
+
+<!-- TODO: once Varotto and Macfarlane agree, remove analysis/choice-models/LICENSE,
+update analysis/choice-models/CITATION.cff (license: Apache-2.0), and drop this exception list. -->
+
+**Data:** not distributed in this repository; see the Zenodo record
+([`zenodo/README.md`](zenodo/README.md)) for the data license. The underlying
+papers remain under Elsevier's copyright and are not redistributed.
 
 ## Citation
 
@@ -87,5 +97,3 @@ accompanying paper. Machine-readable metadata is in
   url     = {https://doi.org/10.1016/j.trc.2026.106024}
 }
 ```
-
-Preprint: [arXiv:2601.14429](https://arxiv.org/abs/2601.14429)

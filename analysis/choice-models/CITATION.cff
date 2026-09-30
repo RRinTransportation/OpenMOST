@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Choice models for data and code availability"
+version: 0.1.0
+date-released: 2026-08-11
+authors:
+  - family-names: "Varotto"
+    given-names: "Silvia Francesca"
+    affiliation: "EMob-Lab, ENTPE (UMR Université Gustave Eiffel – ENTPE)"
+preferred-citation:
+  type: article
+  title: "Measuring the State of Open Science in Transportation Using Large Language Models"
+  authors:
+    - given-names: "Junyi"
+      family-names: "Ji"
+    - given-names: "Ruth"
+      family-names: "Lu"
+    - given-names: "Linda"
+      family-names: "Belkessa"
+    - given-names: "Liming"
+      family-names: "Wang"
+    - given-names: "Silvia"
+      family-names: "Varotto"
+    - given-names: "Yongqi"
+      family-names: "Dong"
+    - given-names: "Nicolas"
+      family-names: "Saunier"
+    - given-names: "Mostafa"
+      family-names: "Ameli"
+    - given-names: "Gregory S."
+      family-names: "Macfarlane"
+    - given-names: "Bahman"
+      family-names: "Madadi"
+    - given-names: "Cathy"
+      family-names: "Wu"
+  url: "https://arxiv.org/abs/2601.14429"
