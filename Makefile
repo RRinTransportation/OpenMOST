@@ -6,14 +6,30 @@ UV       ?= uv
 PY_DIRS  := full-text-extraction feature-extraction analysis/choice-models
 R_DIR    := analysis/descriptive-statistics-and-bivariate-tests
 
-.PHONY: help setup setup-python setup-r check-locks validate \
+.PHONY: help data setup setup-python setup-r check-locks validate \
         validate-choice-models validate-descriptive validate-feature-extraction
 
 help:
+	@echo "make data         download, checksum and unzip the Zenodo data into zenodo/"
 	@echo "make setup        install every locked environment (uv sync + renv::restore)"
 	@echo "make check-locks  verify uv.lock / renv.lock are in sync with their manifests"
 	@echo "make validate     re-run the analyses and compare with the committed/published results"
 	@echo "  make validate-choice-models | validate-descriptive | validate-feature-extraction"
+
+ZENODO_URL := https://zenodo.org/records/23045964/files
+
+data:
+	@cd zenodo && for f in analysis_dataset:1b1bfbc6e2d127cada44b349b1a2bdcc \
+	    sample_xml_data:67244bc81d500261ffa5a44cb501c57d \
+	    manual-validation-dataset:c512928e681854b1cbf2a8578f7592ec; do \
+	  name=$${f%%:*}; md5=$${f##*:}; \
+	  [ -f $$name.zip ] || curl -fsSL -o $$name.zip "$(ZENODO_URL)/$$name.zip?download=1" || exit 1; \
+	  got=$$(python3 -c "import hashlib,sys;print(hashlib.md5(open(sys.argv[1],'rb').read()).hexdigest())" $$name.zip); \
+	  [ "$$got" = "$$md5" ] || { echo "$$name.zip: MD5 mismatch ($$got)"; exit 1; }; \
+	  echo "$$name.zip: OK"; \
+	done
+	cd zenodo && unzip -oq analysis_dataset.zip && unzip -oq sample_xml_data.zip \
+	  && unzip -oq manual-validation-dataset.zip -d manual-validation-dataset
 
 setup: setup-python setup-r
 

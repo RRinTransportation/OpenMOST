@@ -22,9 +22,10 @@ published separately on Zenodo and are placed in [`zenodo/`](zenodo).
    git clone https://github.com/RRinTransportation/OpenMOST.git
    cd OpenMOST
    ```
-2. Download `analysis_dataset.zip`, `sample_xml_data.zip`, and
-   `manual-validation-dataset.zip` from the Zenodo record into `zenodo/` and
-   unzip them. See [`zenodo/README.md`](zenodo/README.md) for the exact commands
+2. Download the data from Zenodo
+   ([10.5281/zenodo.23045964](https://doi.org/10.5281/zenodo.23045964)) into
+   `zenodo/` and unzip it: `make data` downloads, checksums and unzips all three
+   files. See [`zenodo/README.md`](zenodo/README.md) for the exact commands
    and expected layout.
 3. Install the locked environments. Each component has its own:
    [uv](https://docs.astral.sh/uv/) (`pyproject.toml` + `uv.lock` + `.python-version`)
@@ -74,8 +75,10 @@ Exceptions, pending the authors' agreement to relicense under Apache-2.0:
 <!-- TODO: once Varotto and Macfarlane agree, remove analysis/choice-models/LICENSE,
 update analysis/choice-models/CITATION.cff (license: Apache-2.0), and drop this exception list. -->
 
-**Data:** not distributed in this repository; see the Zenodo record
-([`zenodo/README.md`](zenodo/README.md)) for the data license. The underlying
+**Data:** not distributed in this repository. The data are published on
+Zenodo ([10.5281/zenodo.23045964](https://doi.org/10.5281/zenodo.23045964)) under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); see
+[`zenodo/README.md`](zenodo/README.md). The underlying
 papers remain under Elsevier's copyright and are not redistributed.
 
 ## Citation

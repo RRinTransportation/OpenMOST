@@ -9,7 +9,7 @@ Quarto 1.8, TeX Live 2025.
 ## How to validate
 
 ```bash
-# 1. download the Zenodo data into zenodo/ (see zenodo/README.md)
+make data         # download + checksum + unzip the Zenodo data (10.5281/zenodo.23045964)
 make setup        # install every locked environment
 make validate     # lock checks + the three checks below
 ```
